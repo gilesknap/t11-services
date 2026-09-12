@@ -35,8 +35,6 @@ blueapi:
     - name: podbench-app
       mountPath: /podbench/app
     - name: podbench-wrapper
-      mountPath: /podbench-wrapper
-    - name: podbench-wrapper
       mountPath: /app/.venv/bin/blueapi
       subPath: blueapi
 
