@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-podbench-wrapper
 data:
-  python: |
+  blueapi: |
     #!/bin/bash
     while :; do
       [ ! -f /podbench/app/.podbench-ptrace.so ] || export LD_PRELOAD=/podbench/app/.podbench-ptrace.so
@@ -12,7 +12,7 @@ data:
       else
         python=/app/.venv/bin/python
       fi
-      setsid "$python" -Xfrozen_modules=off -m debugpy --listen 5678 --configure-subProcess true -m blueapi -c /config/config.yaml serve &
+      setsid "$python" -m blueapi "$@" &
       child=$!
       echo $child > /tmp/podbench-child.pid
       wait $child; rc=$?

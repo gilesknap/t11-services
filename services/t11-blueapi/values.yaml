@@ -17,7 +17,7 @@
 
 blueapi:
   debug:
-    enabled: true
+    enabled: false
 
   podSecurityContext:
     fsGroup: 1000
@@ -36,14 +36,28 @@ blueapi:
       mountPath: /podbench/app
     - name: podbench-wrapper
       mountPath: /podbench-wrapper
+    - name: podbench-wrapper
+      mountPath: /app/.venv/bin/blueapi
+      subPath: blueapi
+
+  livenessProbe: &podbenchProbe
+    httpGet: null
+    exec:
+      command:
+        - bash
+        - -c
+        - >-
+          [ -e /tmp/podbench-hold ] || exec /app/.venv/bin/python -c
+          'import urllib.request;
+          urllib.request.urlopen("http://127.0.0.1:8000/healthz", timeout=1)'
+  readinessProbe: *podbenchProbe
+  startupProbe: *podbenchProbe
 
   # oauth2-proxy in front, so blueapi itself is not exposed
   ingress:
     enabled: false
 
   extraEnvVars:
-    - name: PATH
-      value: /podbench-wrapper:/app/.venv/bin:/usr/local/bin:/usr/bin:/bin
     - name: BEAMLINE
       value: adsim
     - name: INSTRUMENT
