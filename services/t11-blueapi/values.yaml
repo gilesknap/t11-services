@@ -111,17 +111,9 @@ blueapi:
         client_id: "tiled-writer"
         client_secret: ${TILED_WRITER_SECRET}
 
-    scratch:
-      root: /workspaces
-      repositories:
-        - name: dodal
-          remote_url: https://github.com/DiamondLightSource/dodal.git
-          target_revision: adsim-prefix
-
   initContainer:
-    enabled: true
-    persistentVolume:
-      enabled: true
+    # Podbench owns the editable checkout and uses the image's original venv.
+    enabled: false
 
 # Lifted from dev-environment/daq-services/services/blueapi-oauth2-proxy/,
 # with the issuer and upstream pointed in-cluster.
