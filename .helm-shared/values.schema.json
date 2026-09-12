@@ -27,6 +27,12 @@
         "epics-pvcs": {
             "type": "object",
             "description": "Shared values for epics-pvcs chart."
+        },
+        "podbench-hotfix-claim": {
+            "$ref": "https://github.com/epics-containers/podbench/releases/download/0.12.0-beta.2/podbench-hotfix-claim.schema.json",
+            "type": "object",
+            "unevaluatedProperties": false,
+            "description": "Values for the Podbench hotfix claim child chart."
         }
     },
     "unevaluatedProperties": false
