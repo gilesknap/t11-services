@@ -7,12 +7,10 @@ data:
     #!/bin/bash
     while :; do
       [ ! -f /podbench/app/.podbench-ptrace.so ] || export LD_PRELOAD=/podbench/app/.podbench-ptrace.so
-      if [ -x /podbench/app/.venv/bin/python ]; then
-        python=/podbench/app/.venv/bin/python
-      else
-        python=/app/.venv/bin/python
+      if [ -d /podbench/app/src ]; then
+        export PYTHONPATH=/podbench/app/src
       fi
-      setsid "$python" -Xfrozen_modules=off -m debugpy --listen 5678 --configure-subProcess true -m blueapi -c /config/config.yaml serve &
+      setsid /app/.venv/bin/python -Xfrozen_modules=off -m debugpy --listen 5678 --configure-subProcess true -m blueapi -c /config/config.yaml serve &
       child=$!
       echo $child > /tmp/podbench-child.pid
       wait $child; rc=$?
