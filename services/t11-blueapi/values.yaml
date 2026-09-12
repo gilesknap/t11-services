@@ -188,3 +188,7 @@ secrets:
   tiledWriterSecret: secret
   # oauth2-proxy requires exactly 16, 24 or 32 bytes
   cookieSecret: Dhf3pGspLQ5DjtzIz_la8mq2MkCsXzeV
+
+podbench-hotfix-claim:
+  enabled: true
+  size: 10Gi

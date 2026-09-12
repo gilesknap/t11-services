@@ -19,9 +19,3 @@ data:
       kill -TERM -"$child" 2>/dev/null || true
       [ -e /tmp/podbench-hold ] || exit $rc
     done
-
----
-
-podbench-hotfix-claim:
-  enabled: true
-  size: 10Gi
