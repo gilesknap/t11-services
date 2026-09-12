@@ -7,7 +7,9 @@ data:
   blueapi: |
     #!/bin/bash
     while :; do
-      [ ! -f /podbench/app/.podbench-ptrace.so ] || export LD_PRELOAD=/podbench/app/.podbench-ptrace.so
+      if [ -f /podbench/app/.podbench-ptrace.so ]; then
+        export LD_PRELOAD=/podbench/app/.podbench-ptrace.so
+      fi
       if [ -x /podbench/app/.venv/bin/python ]; then
         python=/podbench/app/.venv/bin/python
       else
