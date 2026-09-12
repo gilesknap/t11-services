@@ -9,3 +9,4 @@ epics-gateways:
     runAsGroup: 36261
 
   hostNetwork: false
+  baseIp: 10.43.0.0/16
