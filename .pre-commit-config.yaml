@@ -6,6 +6,8 @@ repos:
       - id: check-yaml
         exclude: ^Charts/|/templates/
       - id: check-merge-conflict
+      - id: check-symlinks
+      - id: destroyed-symlinks
       # - id: end-of-file-fixer
       #
       # NOTE: any future formatter / whitespace hook MUST exclude the vendored
@@ -14,6 +16,13 @@ repos:
 
   - repo: local
     hooks:
+      - id: shared-helm-symlinks
+        name: check shared Helm symlinks
+        language: script
+        entry: ./check_shared_helm_symlinks.sh
+        always_run: true
+        pass_filenames: false
+
       - id: tech-ui
         name: generate and validate the synoptic and component screens
         language: system
