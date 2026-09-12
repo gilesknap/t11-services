@@ -15,6 +15,7 @@ ioc-instance:
     - |
       while :; do
         [ ! -x /podbench/app/.venv/bin/python ] || export PATH="/podbench/app/.venv/bin:$PATH"
+        [ ! -f /podbench/app/.podbench-ptrace.so ] || export LD_PRELOAD=/podbench/app/.podbench-ptrace.so
         setsid bash -c "$1" &
         child=$!
         echo $child > /tmp/podbench-child.pid
@@ -31,7 +32,12 @@ ioc-instance:
       fi
   livenessProbe:
     exec:
-      command: [bash, -c, "[ -e /tmp/podbench-hold ] && exit 0; exec /bin/bash /epics/ioc/liveness.sh"]
+      command:
+        [
+          bash,
+          -c,
+          "[ -e /tmp/podbench-hold ] && exit 0; exec /bin/bash /epics/ioc/liveness.sh",
+        ]
     failureThreshold: 3
     initialDelaySeconds: 120
     periodSeconds: 30
@@ -39,7 +45,6 @@ ioc-instance:
     timeoutSeconds: 1
   podSecurityContext:
     fsGroup: 36261
-
 
 podbench-hotfix-claim:
   enabled: true
