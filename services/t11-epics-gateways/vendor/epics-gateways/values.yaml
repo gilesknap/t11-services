@@ -1,0 +1,32 @@
+image:
+  repository: ghcr.io/epics-containers/epics-gateways-runtime
+  tag: ""
+imagePullPolicy: IfNotPresent
+overrideConfig: false
+caServerPort: 9064
+pvaServerPort: 9075
+loadBalancerIP: ""
+nodeName:
+caMaxArrayBytes: "3000000"
+hostNetwork: true
+pvaAddrList:
+caAddrList:
+caDebug: 0
+pvaDebug: 0
+baseIp: 10.96.0.0/12
+securityContext: {}
+tolerations: []
+affinity: {}
+resources:
+  limits:
+    cpu: 800m
+    memory: 1500Mi
+  requests:
+    cpu: 200m
+    memory: 400Mi
+volumes: []
+volumeMounts: []
+caCommand: [bash]
+caArgs: [/config/start-ca.sh]
+pvaCommand: [bash]
+pvaArgs: [/config/start-pva.sh]

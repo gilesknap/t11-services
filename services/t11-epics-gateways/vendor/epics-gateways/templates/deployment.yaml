@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: {{ .Release.Name }}
+  name: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      serviceAccountName: default-full-access-mounted
+      {{- if or .Values.overrideConfig .Values.volumes }}
+      volumes:
+        {{- if .Values.overrideConfig }}
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-config
+        {{- end }}
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Release.Name }}-ca-gateway
+          command: {{ toYaml .Values.caCommand | nindent 12 }}
+          args: {{ toYaml .Values.caArgs | nindent 12 }}
+          env: &envGateways
+            - name: EPICS_CA_MAX_ARRAY_BYTES
+              value: {{ .Values.caMaxArrayBytes | quote }}
+            - name: EPICS_CA_AUTO_ADDR_LIST
+              value: {{ ternary "YES" "NO" .Values.hostNetwork | quote }}
+            - name: EPICS_PVA_AUTO_ADDR_LIST
+              value: {{ ternary "YES" "NO" .Values.hostNetwork | quote }}
+            - name: EPICS_CA_ADDR_LIST
+              value: {{ .Values.caAddrList | quote }}
+            - name: EPICS_PVA_ADDR_LIST
+              value: {{ .Values.pvaAddrList | quote }}
+            - name: CA_SERVER_PORT
+              value: {{ .Values.caServerPort | quote }}
+            - name: PVA_SERVER_PORT
+              value: {{ .Values.pvaServerPort | quote }}
+            - name: CA_DEBUG
+              value: {{ .Values.caDebug | quote }}
+            - name: PVA_DEBUG
+              value: {{ .Values.pvaDebug | quote }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          stdin: true
+          tty: true
+          volumeMounts:
+            {{- if .Values.overrideConfig }}
+            - name: config-volume
+              mountPath: /config
+            {{- end }}
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        - name: {{ .Release.Name }}-pva-gateway
+          command: {{ toYaml .Values.pvaCommand | nindent 12 }}
+          args: {{ toYaml .Values.pvaArgs | nindent 12 }}
+          env: *envGateways
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          stdin: true
+          tty: true
+          volumeMounts:
+            {{- if .Values.overrideConfig }}
+            - name: config-volume
+              mountPath: /config
+            {{- end }}
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      {{- if .Values.nodeName }}
+      nodeName: {{ .Values.nodeName }}
+      {{- end }}
+      {{- if .Values.hostNetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 1

@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-podbench-wrapper
+data:
+  start-ca.sh: |
+    #!/bin/bash
+    while :; do
+      [ ! -f /podbench/app/.podbench-ptrace.so ] || export LD_PRELOAD=/podbench/app/.podbench-ptrace.so
+      if [ -f /podbench/app/settings/config/start-ca.sh ]; then
+        command=(bash /podbench/app/settings/config/start-ca.sh)
+      else
+        command=(bash /config/start-ca.sh)
+      fi
+      setsid "${command[@]}" &
+      child=$!
+      echo $child > /tmp/podbench-child.pid
+      wait $child; rc=$?
+      kill -TERM -"$child" 2>/dev/null || true
+      [ -e /tmp/podbench-hold ] || exit $rc
+    done
+  start-pva.sh: |
+    #!/bin/bash
+    while :; do
+      [ ! -x /podbench/app/.venv/bin/python ] || export PATH="/podbench/app/.venv/bin:$PATH"
+      [ ! -f /podbench/app/.podbench-ptrace.so ] || export LD_PRELOAD=/podbench/app/.podbench-ptrace.so
+      if [ -f /podbench/app/settings/config/start-pva.sh ]; then
+        command=(bash /podbench/app/settings/config/start-pva.sh)
+      else
+        command=(bash /config/start-pva.sh)
+      fi
+      setsid "${command[@]}" &
+      child=$!
+      echo $child > /tmp/podbench-child.pid
+      wait $child; rc=$?
+      kill -TERM -"$child" 2>/dev/null || true
+      [ -e /tmp/podbench-hold ] || exit $rc
+    done

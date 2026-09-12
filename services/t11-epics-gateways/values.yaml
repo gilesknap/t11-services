@@ -7,6 +7,31 @@ epics-gateways:
     # k8s-t11-beamline
     runAsUser: 36261
     runAsGroup: 36261
+    fsGroup: 36261
 
   hostNetwork: false
   baseIp: 10.43.0.0/16
+
+  volumes:
+    - name: podbench-app
+      persistentVolumeClaim:
+        claimName: t11-epics-gateways-podbench-project
+    - name: podbench-wrapper
+      configMap:
+        name: t11-epics-gateways-podbench-wrapper
+        defaultMode: 0755
+
+  volumeMounts:
+    - name: podbench-app
+      mountPath: /podbench/app
+    - name: podbench-wrapper
+      mountPath: /podbench-wrapper
+
+  caCommand: [bash, /podbench-wrapper/start-ca.sh]
+  caArgs: []
+  pvaCommand: [bash, /podbench-wrapper/start-pva.sh]
+  pvaArgs: []
+
+podbench-hotfix-claim:
+  enabled: true
+  size: 10Gi
