@@ -28,6 +28,7 @@ tiled:
       memory: 2Gi
 
   livenessProbe: &podbenchProbe
+    failureThreshold: 13
     httpGet: null
     exec:
       command:
@@ -37,7 +38,9 @@ tiled:
           [ -e /tmp/podbench-hold ] || exec /app/bin/python -c
           'import urllib.request;
           urllib.request.urlopen("http://127.0.0.1:8000/healthz", timeout=1)'
-  readinessProbe: *podbenchProbe
+  readinessProbe:
+    <<: *podbenchProbe
+    failureThreshold: 3
   image:
     tag: 0.2.18
 
