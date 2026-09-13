@@ -1,0 +1,24 @@
+# The Tiled subchart does not expose command/args overrides.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-podbench-wrapper
+data:
+  tiled: |
+    #!/bin/bash
+    while :; do
+      if [ -f /podbench/app/.podbench-ptrace.so ]; then
+        export LD_PRELOAD=/podbench/app/.podbench-ptrace.so
+      fi
+      if [ -x /podbench/app/.venv/bin/python ]; then
+        python=/podbench/app/.venv/bin/python
+      else
+        python=/app/bin/python
+      fi
+      setsid "$python" -c 'from tiled.commandline.main import main; main()' "$@" &
+      child=$!
+      echo $child > /tmp/podbench-child.pid
+      wait $child; rc=$?
+      kill -TERM -"$child" 2>/dev/null || true
+      [ -e /tmp/podbench-hold ] || exit $rc
+    done

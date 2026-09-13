@@ -17,6 +17,27 @@ tiled:
     kubernetes.io/arch: amd64
 
   fullnameOverride: t11-tiled
+  podSecurityContext:
+    fsGroup: 999
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+  livenessProbe: &podbenchProbe
+    httpGet: null
+    exec:
+      command:
+        - bash
+        - -c
+        - >-
+          [ -e /tmp/podbench-hold ] || exec /app/bin/python -c
+          'import urllib.request;
+          urllib.request.urlopen("http://127.0.0.1:8000/healthz", timeout=1)'
+  readinessProbe: *podbenchProbe
   image:
     tag: 0.2.18
 
@@ -36,10 +57,22 @@ tiled:
       value: SECRET
 
   volumeMounts:
+    - name: podbench-app
+      mountPath: /podbench/app
+    - name: podbench-wrapper
+      mountPath: /app/bin/tiled
+      subPath: tiled
     - name: access-policy
       mountPath: /deploy/access_policy
       readOnly: true
   volumes:
+    - name: podbench-app
+      persistentVolumeClaim:
+        claimName: t11-tiled-podbench-project
+    - name: podbench-wrapper
+      configMap:
+        name: t11-tiled-podbench-wrapper
+        defaultMode: 0755
     - name: access-policy
       configMap:
         name: t11-tiled-access-policy
@@ -133,3 +166,7 @@ postgres:
 postgresPasswords:
   user: tiled_pg
   admin: tiled_pg_admin
+
+podbench-hotfix-claim:
+  enabled: true
+  size: 10Gi
