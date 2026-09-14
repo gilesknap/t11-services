@@ -14,5 +14,5 @@ dependencies:
         parent: ioc-instance
 
   - name: podbench-hotfix-claim
-    version: "0.12.0-beta.2"
+    version: "0.21.0"
     repository: "oci://ghcr.io/epics-containers/charts"

@@ -16,12 +16,11 @@
 # is independent of it.
 
 blueapi:
+  # podbench-hotfix: begin podbench 0.21.1.dev1+g3f8ed2ff8
   debug:
     enabled: false
-
   podSecurityContext:
     fsGroup: 1000
-
   volumes:
     - name: podbench-app
       persistentVolumeClaim:
@@ -30,15 +29,13 @@ blueapi:
       configMap:
         name: t11-blueapi-podbench-wrapper
         defaultMode: 0755
-
   volumeMounts:
     - name: podbench-app
       mountPath: /podbench/app
     - name: podbench-wrapper
       mountPath: /app/.venv/bin/blueapi
       subPath: blueapi
-
-  livenessProbe: &podbenchProbe
+  livenessProbe:
     httpGet: null
     exec:
       command:
@@ -48,9 +45,27 @@ blueapi:
           [ -e /tmp/podbench-hold ] || exec /app/.venv/bin/python -c
           'import urllib.request;
           urllib.request.urlopen("http://127.0.0.1:8000/healthz", timeout=1)'
-  readinessProbe: *podbenchProbe
-  startupProbe: *podbenchProbe
-
+  readinessProbe:
+    httpGet: null
+    exec:
+      command:
+        - bash
+        - -c
+        - >-
+          exec /app/.venv/bin/python -c
+          'import urllib.request;
+          urllib.request.urlopen("http://127.0.0.1:8000/healthz", timeout=1)'
+  startupProbe:
+    httpGet: null
+    exec:
+      command:
+        - bash
+        - -c
+        - >-
+          [ -e /tmp/podbench-hold ] || exec /app/.venv/bin/python -c
+          'import urllib.request;
+          urllib.request.urlopen("http://127.0.0.1:8000/healthz", timeout=1)'
+  # podbench-hotfix: end
   # oauth2-proxy in front, so blueapi itself is not exposed
   ingress:
     enabled: false

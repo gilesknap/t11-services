@@ -3,6 +3,7 @@
 ioc-instance:
   image: ghcr.io/epics-containers/ioc-motorsim-developer:2025.11.1
 
+  # podbench-hotfix: begin podbench 0.21.1.dev1+g3f8ed2ff8
   volumes:
     - name: podbench-app
       persistentVolumeClaim:
@@ -207,7 +208,12 @@ ioc-instance:
         sleep 0.1
       done
     - podbench-supervisor
-    - exec bash -c 'if [[ -f /podbench/app/ioc/start.sh ]]; then exec bash /podbench/app/ioc/start.sh; else exec bash /epics/ioc/start.sh; fi'
+    - |
+      if [[ -f /podbench/app/ioc/start.sh ]]; then
+        exec bash /podbench/app/ioc/start.sh
+      else
+        exec bash -c /epics/ioc/start.sh
+      fi
   livenessProbe:
     exec:
       command: [bash, -c, "[ -e /tmp/podbench-hold ] && exit 0; exec /bin/bash /epics/ioc/liveness.sh"]
@@ -218,7 +224,7 @@ ioc-instance:
     timeoutSeconds: 1
   podSecurityContext:
     fsGroup: 36261
-
+  # podbench-hotfix: end
 podbench-hotfix-claim:
   enabled: true
   size: 10Gi
